@@ -4,8 +4,6 @@ import ssl
 
 class URL:
     def __init__(self, url):
-        if url[-1] != "/":
-            url += "/"
         self.scheme, url = url.split("://", 1)
         assert self.scheme in ["http", "https"]
         self.host, url = url.split("/", 1)
@@ -23,7 +21,7 @@ class URL:
             else:
                 self.path = url
         else:
-            self.path = ""
+            self.path = "/"
         print(self.scheme, self.host, self.port, self.path)
 
     def request(self):
@@ -59,7 +57,8 @@ class URL:
         s.close()
         return content
 
-    def show(self, body):
+    def lex(self, body):
+        text = ""
         in_tag = False
         for c in body:
             if c == "<":
@@ -67,12 +66,13 @@ class URL:
             elif c == ">":
                 in_tag = False
             elif not in_tag:
-                print(c, end="")
+                text += c
+        return text
 
 
 def load(url):
     body = url.request()
-    url.show(body)
+    print(url.lex(body))
 
 
 if __name__ == "__main__":
