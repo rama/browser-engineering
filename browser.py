@@ -1,22 +1,10 @@
 import tkinter
+import tkinter.font
 from url import URL
 
 WIDTH, HEIGHT = 800, 600
 HSTEP, VSTEP = 13, 18
 SCROLL_STEP = 100
-
-
-def layout(text):
-    display_list = []
-    cursor_x, cursor_y = HSTEP, VSTEP
-    for c in text:
-        display_list.append((cursor_x, cursor_y, c))
-        if cursor_x >= WIDTH - HSTEP:
-            cursor_y += VSTEP
-            cursor_x = HSTEP
-        else:
-            cursor_x += HSTEP
-    return display_list
 
 
 class Browser:
@@ -26,6 +14,10 @@ class Browser:
         self.canvas.pack()
         self.scroll = 0
         self.window.bind("<Down>", self.scrolldown)
+        self.bodyfont = tkinter.font.Font(
+            family="Georgia",
+            size=16,
+        )
 
     def scrolldown(self, e):
         self.scroll += SCROLL_STEP
@@ -35,7 +27,7 @@ class Browser:
         body = url.request()
         text = url.lex(body)
 
-        self.display_list = layout(text)
+        self.display_list = self.layout(text)
         self.draw()
 
     def draw(self):
@@ -45,7 +37,25 @@ class Browser:
                 continue
             if y + VSTEP < self.scroll:
                 continue
-            self.canvas.create_text(x, y - self.scroll, text=c)
+            self.canvas.create_text(
+                x,
+                y - self.scroll,
+                text=c,
+                font=self.bodyfont,
+                anchor="nw",
+            )
+
+    def layout(self, text):
+        display_list = []
+        cursor_x, cursor_y = HSTEP, VSTEP
+        for word in text.split():
+            w = self.bodyfont.measure(word)
+            if cursor_x + w >= WIDTH - HSTEP:
+                cursor_y += self.bodyfont.metrics("linespace") * 1.25
+                cursor_x = HSTEP
+            display_list.append((cursor_x, cursor_y, word))
+            cursor_x += w + self.bodyfont.measure(" ")
+        return display_list
 
 
 if __name__ == "__main__":
