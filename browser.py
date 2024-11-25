@@ -1,6 +1,7 @@
 import tkinter
 import tkinter.font
 from url import URL
+from layout import Layout, lex
 
 WIDTH, HEIGHT = 800, 600
 HSTEP, VSTEP = 13, 18
@@ -25,14 +26,14 @@ class Browser:
 
     def load(self, url):
         body = url.request()
-        text = url.lex(body)
+        tokens = lex(body)
 
-        self.display_list = self.layout(text)
+        self.display_list = Layout(tokens).display_list
         self.draw()
 
     def draw(self):
         self.canvas.delete("all")
-        for x, y, c in self.display_list:
+        for x, y, c, f in self.display_list:
             if y > self.scroll + HEIGHT:
                 continue
             if y + VSTEP < self.scroll:
@@ -41,21 +42,9 @@ class Browser:
                 x,
                 y - self.scroll,
                 text=c,
-                font=self.bodyfont,
+                font=f,
                 anchor="nw",
             )
-
-    def layout(self, text):
-        display_list = []
-        cursor_x, cursor_y = HSTEP, VSTEP
-        for word in text.split():
-            w = self.bodyfont.measure(word)
-            if cursor_x + w >= WIDTH - HSTEP:
-                cursor_y += self.bodyfont.metrics("linespace") * 1.25
-                cursor_x = HSTEP
-            display_list.append((cursor_x, cursor_y, word))
-            cursor_x += w + self.bodyfont.measure(" ")
-        return display_list
 
 
 if __name__ == "__main__":
