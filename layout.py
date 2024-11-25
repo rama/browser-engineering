@@ -2,6 +2,18 @@ import tkinter.font
 
 WIDTH, HEIGHT = 800, 600
 HSTEP, VSTEP = 13, 18
+FONTS = {}
+
+
+def get_font(size, weight, style):
+    key = (size, weight, style)
+    if key not in FONTS:
+        font = tkinter.font.Font(
+            family="Georgia", size=size, weight=weight, slant=style
+        )
+        label = tkinter.Label(font=font)
+        FONTS[key] = (font, label)
+    return FONTS[key][0]
 
 
 class Text:
@@ -73,12 +85,7 @@ class Layout:
             self.cursor_y += VSTEP
 
     def word(self, word):
-        self.font = tkinter.font.Font(
-            family="Georgia",
-            size=self.size,
-            weight=self.weight,
-            slant=self.style,
-        )
+        self.font = get_font(self.size, self.weight, self.style)
         w = self.font.measure(word)
         if self.cursor_x + w >= WIDTH - HSTEP:
             self.flush()
